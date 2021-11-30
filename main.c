@@ -44,8 +44,18 @@ TIM_HandleTypeDef htim1;
 
 /* USER CODE BEGIN PV */
 uint8_t difficulty = 0;
-uint8_t symCounter = 0;
+int symCounter = 0;
+bool shiftMode = SHIFT_LEFT;
 char diffMessage[] = "Choose difficulty from 1 to 3";
+
+int value_1 = 0;
+int value_2 = 0;
+int value_3 = 0;
+
+int action_1 = 0;
+int action_2 = 0;
+
+char string[2];
 
 /* USER CODE END PV */
 
@@ -104,10 +114,21 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-		/*HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-		HAL_Delay(1000);*/
 		if(difficulty == 0)
 		{
+			for(int i = 0; i < 10; i++)
+			{
+				if((i == 8) || (i == 9))
+				{
+					mt_lcd_write_byte(diffMessage[i], 56 + i);
+				}
+				else
+				{
+					mt_lcd_write_byte(diffMessage[i], i);
+				}
+			}
+			symCounter = 10;
+			HAL_TIM_Base_Start_IT(&htim1);
 			
 			do
 			{
@@ -124,9 +145,43 @@ int main(void)
 				}
 			}
 			while(!(difficulty == SHARP_BUTTON));	
+			HAL_TIM_Base_Stop_IT(&htim1);
+			mt_lcd_clear_display();
+			
 			if(difficulty != 0)
 			{
-				
+				switch(difficulty)
+				{
+					case 1:
+						value_1 = rand();
+						value_2 = rand();
+						sprintf(string, "%d", value_1);
+						mt_lcd_write_byte(string[0], 0x00);
+						mt_lcd_write_byte(string[1], 0x01);
+						sprintf(string, "%d", value_2);
+						mt_lcd_write_byte(string[0], 0x03);
+						mt_lcd_write_byte(string[1], 0x04);
+					
+						action_1 = rand();
+						if(action_1 > 49)
+						{
+							mt_lcd_write_byte('-', 0x02);
+						}
+						else 
+						{
+							mt_lcd_write_byte('+', 0x02);
+						}
+						break;
+					case 2:
+						
+						break;		
+					case 3:
+						
+						break;
+					default:
+						//error!
+						break;									
+				}
 			}
 		}	
   }

@@ -37,6 +37,7 @@ extern "C" {
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 
 /* USER CODE END Includes */
 
@@ -64,6 +65,10 @@ typedef enum{
 }keyboard;
 
 extern uint8_t difficulty;
+extern uint8_t difficulty;
+extern int symCounter;
+extern bool	shiftMode;
+extern char diffMessage[];
 
 /* USER CODE END EC */
 
@@ -113,7 +118,10 @@ extern void DWT_Delay(uint32_t us);
 #define R3_Pin GPIO_PIN_15
 #define R3_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
-
+#define SHIFT_LEFT		false
+#define	SHIFT_RIGHT		true
+#define RAND_MAX			99
+	
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
