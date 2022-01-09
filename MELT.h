@@ -26,7 +26,11 @@
 #define D4 	4	
 #define PAGE1 0
 #define PAGE2 64	
-#define STRING_LEN	10
+#define STRING_LEN		10
+#define SPACE_1_FIRST 0x00
+#define SPACE_1_LAST 	0x27
+#define SPACE_2_FIRST 0x40
+#define SPACE_2_LAST 	0x67
 
 typedef enum{
 	SYM_1 = 0,

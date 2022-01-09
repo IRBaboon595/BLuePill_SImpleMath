@@ -205,35 +205,29 @@ void SysTick_Handler(void)
 void TIM1_UP_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM1_UP_IRQn 0 */
-	
+	//HAL_TIM_Base_Stop_IT(&htim1);
   /* USER CODE END TIM1_UP_IRQn 0 */
   HAL_TIM_IRQHandler(&htim1);
   /* USER CODE BEGIN TIM1_UP_IRQn 1 */
-	if((symCounter < 30) && (symCounter != -1))
+	mt_lcd_shift(true, shiftMode);
+	
+	if(shiftMode == SHIFT_LEFT)
 	{
-		mt_lcd_shift(true, shiftMode);
-		
-		if(shiftMode == SHIFT_LEFT)
-		{
-			mt_lcd_write_byte(diffMessage[symCounter], 0x41);
-			symCounter++;
-		}
-		else 
-		{
-			mt_lcd_write_byte(diffMessage[symCounter], 0x00);
-			symCounter--;
-		}		
+		symCounter++;
 	}
-	else if(symCounter == 30)
+	else 
+	{
+		symCounter--;
+	}		
+	if(symCounter == 30)
 	{
 		shiftMode = SHIFT_RIGHT;
-		symCounter = 18;
 	}
-	else if(symCounter < 0)
+	else if(symCounter == 10)
 	{
 		shiftMode = SHIFT_LEFT;
-		symCounter = 10;
-	}
+	}	
+	//HAL_TIM_Base_Start_IT(&htim1);
   /* USER CODE END TIM1_UP_IRQn 1 */
 }
 

@@ -54,9 +54,15 @@ int value_3 = 0;
 
 int action_1 = 0;
 int action_2 = 0;
-
+uint16_t adr_cnt = 0x00;
+int ex_cnt = 0;
 char string[2];
-
+int result = 0;
+int answer = 0;
+int sum = 0;
+int temp = 0;
+int degree = 1;
+int sign = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -103,6 +109,7 @@ int main(void)
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
 	DWT_Init();
+	HAL_Delay(100);
 	mt_LCD_init();
 	mt_lcd_clear_display();
   /* USER CODE END 2 */
@@ -111,23 +118,27 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+		if(keyboardScan() == SHARP_BUTTON)
+		{
+			difficulty = 0;
+			mt_lcd_clear_display();
+		}
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
 		if(difficulty == 0)
 		{
-			for(int i = 0; i < 10; i++)
+			for(int i = 0; i < 30; i++)
 			{
-				if((i == 8) || (i == 9))
+				mt_lcd_write_byte(diffMessage[i], i);
+				
+				if((i >= 8))
 				{
 					mt_lcd_write_byte(diffMessage[i], 56 + i);
 				}
-				else
-				{
-					mt_lcd_write_byte(diffMessage[i], i);
-				}
 			}
 			symCounter = 10;
+			HAL_Delay(1000);
 			HAL_TIM_Base_Start_IT(&htim1);
 			
 			do
@@ -135,6 +146,7 @@ int main(void)
 				difficulty = keyboardScan();
 			}
 			while(!((difficulty == ONE_BUTTON) ^ (difficulty == TWO_BUTTON) ^ (difficulty == THREE_BUTTON)));	
+			temp = difficulty;
 			do
 			{
 				difficulty = keyboardScan();
@@ -145,45 +157,202 @@ int main(void)
 				}
 			}
 			while(!(difficulty == SHARP_BUTTON));	
+			difficulty = temp;
 			HAL_TIM_Base_Stop_IT(&htim1);
 			mt_lcd_clear_display();
+			HAL_Delay(1000);
 			
 			if(difficulty != 0)
 			{
 				switch(difficulty)
 				{
 					case 1:
-						value_1 = rand();
-						value_2 = rand();
+						while(ex_cnt != 10)
+						{
+							mt_lcd_clear_display();
+							value_1 = rand() % 100;
+							value_2 = rand() % 100;
+							action_1 = rand() % 100;
+							sprintf(string, "%d", value_1);
+							adr_cnt = 0x00;
+							for (int i = 0; i < strlen(string); i++)
+							{
+								mt_lcd_write_byte(string[i], adr_cnt);
+								adr_cnt++;								
+							}
+							if(action_1 > 49)
+							{
+								result = value_1 - value_2;
+								mt_lcd_write_byte('-', adr_cnt);
+							}
+							else 
+							{
+								result = value_1 + value_2;
+								mt_lcd_write_byte('+', adr_cnt);
+							}
+							adr_cnt++;
+							sprintf(string, "%d", value_2);
+							for (int i = 0; i < strlen(string); i++)
+							{
+								mt_lcd_write_byte(string[i], adr_cnt);
+								adr_cnt++;
+							}
+							mt_lcd_write_byte('=', adr_cnt);
+							adr_cnt++;
+							temp = 0;		
+							do
+							{
+								answer = 0;
+								do
+								{
+									answer = keyboardScan();
+								}
+								while(answer == 0);
+								if(answer == SHARP_BUTTON)
+									break;
+								if(answer != 0x0A)
+								{
+									if(answer == 0x0B)
+										answer = 0;
+									if(temp != 0)
+									{
+										temp *= 10;
+									}
+									temp += answer;
+									degree++;
+									sprintf(string, "%d", answer);
+									mt_lcd_write_byte(string[0], adr_cnt);
+									adr_cnt++;
+									if(adr_cnt == 8)
+									{
+										adr_cnt = 0x40;
+									}
+									HAL_Delay(1000);									
+								}
+								else
+								{
+									if(degree == 1)
+									{
+										answer = '-';
+										degree++;
+										sprintf(string, "%c", answer);
+										sign = 1;
+										mt_lcd_write_byte(string[0], adr_cnt);
+										adr_cnt++;
+										if(adr_cnt == 8)
+										{
+											adr_cnt = 0x40;
+										}
+										HAL_Delay(1000);	
+									}								
+								}
+							}
+							while(!(degree == 4));								
+							answer = temp;
+							if(sign == 1)
+								answer *= -1;
+							
+							if(answer == result)
+								sum++;	
+							degree = 1;
+							answer = 0;
+							do
+							{
+								answer = keyboardScan();
+							}
+							while(!(answer == STAR_BUTTON));	
+							HAL_Delay(1000);							
+							answer = 0;	
+							sign = 0;
+							ex_cnt++;
+					  }
+						mt_lcd_clear_display();
+						memset(string, 0, 2);
+						sprintf(string, "%d", sum);
+						mt_lcd_write_byte(string[1], 0x00);
+						mt_lcd_write_byte(string[0], 0x01);
+						break;
+					case 2:
+						value_1 = rand() % 100;
+						value_2 = rand() % 100;
+					  action_1 = rand() % 100;
 						sprintf(string, "%d", value_1);
-						mt_lcd_write_byte(string[0], 0x00);
-						mt_lcd_write_byte(string[1], 0x01);
-						sprintf(string, "%d", value_2);
-						mt_lcd_write_byte(string[0], 0x03);
-						mt_lcd_write_byte(string[1], 0x04);
-					
-						action_1 = rand();
+					  adr_cnt = 0x00;
+					  for (int i = 0; i < strlen(string); i++)
+						{
+							mt_lcd_write_byte(string[i], adr_cnt);
+							adr_cnt++;
+						}
 						if(action_1 > 49)
 						{
-							mt_lcd_write_byte('-', 0x02);
+							mt_lcd_write_byte('/', adr_cnt);
 						}
 						else 
 						{
-							mt_lcd_write_byte('+', 0x02);
+							mt_lcd_write_byte('*', adr_cnt);
 						}
+						adr_cnt++;
+						sprintf(string, "%d", value_2);
+						for (int i = 0; i < strlen(string); i++)
+						{
+							mt_lcd_write_byte(string[i], adr_cnt);
+							adr_cnt++;
+						}	
 						break;
-					case 2:
-						
-						break;		
 					case 3:
-						
-						break;
+						value_1 = rand() % 100;
+						value_2 = rand() % 100;			
+						value_3 = rand() % 100;
+					  action_1 = rand() % 100;
+					  action_2 = rand() % 100;
+						sprintf(string, "%d", value_1);
+						mt_lcd_write_byte('(', 0x00);
+					  adr_cnt = 0x01;
+						for (int i = 0; i < strlen(string); i++)
+						{
+							mt_lcd_write_byte(string[i], adr_cnt);
+							adr_cnt++;
+						}
+						if(action_1 > 49)
+						{
+							mt_lcd_write_byte('-', adr_cnt);
+						}
+						else 
+						{
+							mt_lcd_write_byte('+', adr_cnt);
+						}
+						adr_cnt++;
+						sprintf(string, "%d", value_2);
+						for (int i = 0; i < strlen(string); i++)
+						{
+							mt_lcd_write_byte(string[i], adr_cnt);
+							adr_cnt++;
+						}
+						mt_lcd_write_byte(')', adr_cnt);
+						adr_cnt++;
+						if(action_2 > 49)
+						{
+							mt_lcd_write_byte('/', adr_cnt);
+						}
+						else 
+						{
+							mt_lcd_write_byte('*', adr_cnt);
+						}
+						adr_cnt++;
+						sprintf(string, "%d", value_1);
+						for (int i = 0; i < strlen(string); i++)
+						{
+							mt_lcd_write_byte(string[i], adr_cnt);
+							adr_cnt++;
+						}
 					default:
 						//error!
 						break;									
 				}
 			}
-		}	
+		}
+		/*HAL_Delay(1000);
+		HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);*/
   }
   /* USER CODE END 3 */
 }
@@ -248,7 +417,7 @@ static void MX_TIM1_Init(void)
   htim1.Init.Prescaler = 549;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim1.Init.Period = 65535;
-  htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV4;
   htim1.Init.RepetitionCounter = 0;
   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
   if (HAL_TIM_Base_Init(&htim1) != HAL_OK)
@@ -313,17 +482,17 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : C0_Pin C1_Pin C2_Pin */
-  GPIO_InitStruct.Pin = C0_Pin|C1_Pin|C2_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
   /*Configure GPIO pins : R0_Pin R1_Pin R2_Pin R3_Pin */
   GPIO_InitStruct.Pin = R0_Pin|R1_Pin|R2_Pin|R3_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : C0_Pin C1_Pin C2_Pin */
+  GPIO_InitStruct.Pin = C0_Pin|C1_Pin|C2_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
 }
@@ -335,14 +504,15 @@ uint16_t keyboardScan(void)
 	
 	for(int t = 0; t < 4; t++)
 	{
-		HAL_GPIO_WritePin(R0_GPIO_Port, R0_Pin + t, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(R0_GPIO_Port, R0_Pin << t, GPIO_PIN_SET);
 		for(int i = 0; i < 3; i++)
 		{
-			if(HAL_GPIO_ReadPin(C0_GPIO_Port, C0_Pin + i))
+			if(HAL_GPIO_ReadPin(C0_GPIO_Port, C0_Pin << i))
 			{
-				result |= ONE_BUTTON + i + t * 3;
+				result += ONE_BUTTON + i + t * 3;
 			}
 		}		
+		HAL_GPIO_WritePin(R0_GPIO_Port, R0_Pin << t, GPIO_PIN_RESET);
 	}
 	return result;
 }

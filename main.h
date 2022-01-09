@@ -50,7 +50,7 @@ extern "C" {
 /* USER CODE BEGIN EC */
 
 typedef enum{
-	ONE_BUTTON = 0,
+	ONE_BUTTON = 1,
 	TWO_BUTTON,
 	THREE_BUTTON,
 	FOUR_BUTTON,
@@ -103,12 +103,6 @@ extern void DWT_Delay(uint32_t us);
 #define DB6_GPIO_Port GPIOA
 #define DB7_Pin GPIO_PIN_7
 #define DB7_GPIO_Port GPIOA
-#define C0_Pin GPIO_PIN_0
-#define C0_GPIO_Port GPIOB
-#define C1_Pin GPIO_PIN_1
-#define C1_GPIO_Port GPIOB
-#define C2_Pin GPIO_PIN_2
-#define C2_GPIO_Port GPIOB
 #define R0_Pin GPIO_PIN_12
 #define R0_GPIO_Port GPIOB
 #define R1_Pin GPIO_PIN_13
@@ -117,10 +111,15 @@ extern void DWT_Delay(uint32_t us);
 #define R2_GPIO_Port GPIOB
 #define R3_Pin GPIO_PIN_15
 #define R3_GPIO_Port GPIOB
+#define C0_Pin GPIO_PIN_4
+#define C0_GPIO_Port GPIOB
+#define C1_Pin GPIO_PIN_5
+#define C1_GPIO_Port GPIOB
+#define C2_Pin GPIO_PIN_6
+#define C2_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 #define SHIFT_LEFT		false
 #define	SHIFT_RIGHT		true
-#define RAND_MAX			99
 	
 /* USER CODE END Private defines */
 
